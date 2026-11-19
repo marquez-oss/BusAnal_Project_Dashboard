@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philippine Rice & Fertilizer Analytics Dashboard (2019-2026)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!--Custom CSS-->
+    <link rel="stylesheet" href="philippine_rice_fertilizer_dashboard.css">
+     
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans h-full flex flex-col antialiased">
+
+    <!-- Header Navigation -->
+    <header class="bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-600 p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-seedling text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Philippine Rice & Fertilizer Analytics</h1>
+                    <p class="text-xs text-emerald-300 font-medium">Integrated Agricultural Intelligence Dashboard (2019–2026)</p>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <nav class="flex flex-wrap items-center gap-1.5 bg-slate-800/80 p-1.5 rounded-xl border border-slate-700/50 text-sm">
+                <button onclick="switchTab('overview')" id="btn-overview" class="tab-btn px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-emerald-600 text-white shadow">Overview</button>
+                <button onclick="switchTab('fertilizer')" id="btn-fertilizer" class="tab-btn px-4 py-2 rounded-lg font-medium transition-all duration-200 text-slate-300 hover:text-white hover:bg-slate-700">Fertilizer Prices</button>
+                <button onclick="switchTab('rice')" id="btn-rice" class="tab-btn px-4 py-2 rounded-lg font-medium transition-all duration-200 text-slate-300 hover:text-white hover:bg-slate-700">Retail Rice</button>
+                <button onclick="switchTab('palay')" id="btn-palay" class="tab-btn px-4 py-2 rounded-lg font-medium transition-all duration-200 text-slate-300 hover:text-white hover:bg-slate-700">Palay Economics</button>
+                <button onclick="switchTab('explorer')" id="btn-explorer" class="tab-btn px-4 py-2 rounded-lg font-medium transition-all duration-200 text-slate-300 hover:text-white hover:bg-slate-700">Data Explorer</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Global Filter Bar -->
+    <section class="bg-white border-b border-slate-200 shadow-sm py-3 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-sm">
+            <div class="flex items-center space-x-2 text-slate-500 font-medium">
+                <i class="fa-solid fa-filter text-emerald-600"></i>
+                <span>Global Filters:</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Year Filter -->
+                <div class="flex items-center space-x-2">
+                    <label for="globalYear" class="text-xs font-semibold text-slate-600 uppercase">Year:</label>
+                    <select id="globalYear" onchange="updateDashboardFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg px-3 py-1.5 focus:ring-emerald-500 focus:border-emerald-500 font-medium">
+                        <option value="ALL">All Years (2019–2026)</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026 (Latest)</option>
+                    </select>
+                </div>
+                <!-- Geolocation Filter -->
+                <div class="flex items-center space-x-2">
+                    <label for="globalRegion" class="text-xs font-semibold text-slate-600 uppercase">Geolocation:</label>
+                    <select id="globalRegion" onchange="updateDashboardFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg px-3 py-1.5 focus:ring-emerald-500 focus:border-emerald-500 font-medium">
+                        <option value="PHILIPPINES">PHILIPPINES (National)</option>
+                        <option value="NCR">..NATIONAL CAPITAL REGION (NCR)</option>
+                        <option value="CAR">..CORDILLERA ADMINISTRATIVE REGION (CAR)</option>
+                        <option value="REG01">..Region I (Ilocos Region)</option>
+                        <option value="REG02">..Region II (Cagayan Valley)</option>
+                        <option value="REG03">..Region III (Central Luzon)</option>
+                        <option value="REG04A">..Region IV-A (CALABARZON)</option>
+                        <option value="REG05">..Region V (Bicol Region)</option>
+                        <option value="REG06">..Region VI (Western Visayas)</option>
+                        <option value="REG07">..Region VII (Central Visayas)</option>
+                        <option value="REG08">..Region VIII (Eastern Visayas)</option>
+                        <option value="REG09">..Region IX (Zamboanga Peninsula)</option>
+                        <option value="REG10">..Region X (Northern Mindanao)</option>
+                        <option value="REG11">..Region XI (Davao Region)</option>
+                        <option value="REG12">..Region XII (SOCCSKSARGEN)</option>
+                        <option value="REG13">..Region XIII (Caraga)</option>
+                        <option value="BARMM">..Bangsamoro Autonomous Region (BARMM)</option>
+                    </select>
+                </div>
+                <!-- Fertilizer Grade Filter -->
+                <div class="flex items-center space-x-2">
+                    <label for="globalGrade" class="text-xs font-semibold text-slate-600 uppercase">Grade:</label>
+                    <select id="globalGrade" onchange="updateDashboardFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg px-3 py-1.5 focus:ring-emerald-500 focus:border-emerald-500 font-medium">
+                        <option value="ALL">All Grades / Cereals</option>
+                        <option value="Urea">Urea (45-0-0)</option>
+                        <option value="Complete">Complete (14-14-14)</option>
+                        <option value="Ammosul">Ammosul (21-0-0)</option>
+                        <option value="Ammophos">Ammophos (16-20-0)</option>
+                    </select>
+                </div>
+                <button onclick="resetFilters()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-y-auto">
+
+        <!-- ================= TAB 1: OVERVIEW ================= -->
+        <div id="tab-overview" class="tab-content active space-y-6">
+            
+            <!-- KPI Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- KPI 1 -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -z-0 opacity-60"></div>
+                    <div class="flex items-center justify-between relative z-10 mb-3">
+                        <span class="text-xs font-bold tracking-wider text-emerald-700 uppercase bg-emerald-50 px-2.5 py-1 rounded-md">Fertilizer Dealers Price</span>
+                        <div class="text-emerald-600 bg-emerald-100 p-2 rounded-xl">
+                            <i class="fa-solid fa-sack-dollar text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="kpiFertilizer">₱977.83</h2>
+                        <p class="text-xs text-slate-500 mt-1 flex items-center">
+                            <span class="text-emerald-600 font-semibold mr-1"><i class="fa-solid fa-arrow-down"></i> -4.2%</span> vs previous year (50kg sack)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- KPI 2 -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-0 opacity-60"></div>
+                    <div class="flex items-center justify-between relative z-10 mb-3">
+                        <span class="text-xs font-bold tracking-wider text-blue-700 uppercase bg-blue-50 px-2.5 py-1 rounded-md">Well-Milled Rice Retail</span>
+                        <div class="text-blue-600 bg-blue-100 p-2 rounded-xl">
+                            <i class="fa-solid fa-bowl-rice text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="kpiRice">₱49.21</h2>
+                        <p class="text-xs text-slate-500 mt-1 flex items-center">
+                            <span class="text-amber-600 font-semibold mr-1"><i class="fa-solid fa-arrow-up"></i> +1.8%</span> national retail avg (per kg)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- KPI 3 -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-bl-full -z-0 opacity-60"></div>
+                    <div class="flex items-center justify-between relative z-10 mb-3">
+                        <span class="text-xs font-bold tracking-wider text-amber-700 uppercase bg-amber-50 px-2.5 py-1 rounded-md">Palay Total Costs</span>
+                        <div class="text-amber-600 bg-amber-100 p-2 rounded-xl">
+                            <i class="fa-solid fa-calculator text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="kpiCosts">₱55,097.43</h2>
+                        <p class="text-xs text-slate-500 mt-1">Per hectare average production cost</p>
+                    </div>
+                </div>
+
+                <!-- KPI 4 -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-bl-full -z-0 opacity-60"></div>
+                    <div class="flex items-center justify-between relative z-10 mb-3">
+                        <span class="text-xs font-bold tracking-wider text-purple-700 uppercase bg-purple-50 px-2.5 py-1 rounded-md">Palay Net Returns</span>
+                        <div class="text-purple-600 bg-purple-100 p-2 rounded-xl">
+                            <i class="fa-solid fa-chart-line text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-extrabold text-slate-900" id="kpiReturns">₱18,475.83</h2>
+                        <p class="text-xs text-slate-500 mt-1">Net profit per hectare (2025)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Trend Chart Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Dual-Axis Line Chart -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Fertilizer Prices vs. Rice Retail Price Trends</h3>
+                            <p class="text-xs text-slate-500">Comparative multi-line analysis from 2019 to 2026</p>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-lg font-medium">PSA & FPA Integrated Data</span>
+                    </div>
+                    <div class="relative flex-1 w-full min-h-[320px]">
+                        <canvas id="overviewTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Quick Summary / Insights Card -->
+                <div class="bg-gradient-to-br from-slate-900 to-emerald-950 text-white p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2 text-emerald-400 mb-3">
+                            <i class="fa-solid fa-lightbulb text-lg"></i>
+                            <h4 class="font-bold text-base">Key Agricultural Insights</h4>
+                        </div>
+                        <ul class="space-y-3 text-xs sm:text-sm text-slate-300">
+                            <li class="flex items-start space-x-2">
+                                <i class="fa-solid fa-check text-emerald-400 mt-1"></i>
+                                <span><strong>Fertilizer Volatility:</strong> Urea and Complete prices peaked dramatically in 2022 due to global supply shocks before stabilizing toward 2025–2026.</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa-solid fa-check text-emerald-400 mt-1"></i>
+                                <span><strong>Input Cost Impact:</strong> Fertilizer costs account for roughly 15-20% of total palay cash production expenses per hectare.</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa-solid fa-check text-emerald-400 mt-1"></i>
+                                <span><strong>Retail Price Trends:</strong> Well-milled rice hovered around ₱43-₱45/kg during 2019-2022 before rising to ₱49-₱55/kg range in recent harvests.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+                        <span>Source: PSA OpenSTAT & FPA</span>
+                        <button onclick="switchTab('explorer')" class="text-emerald-400 hover:underline font-semibold flex items-center">
+                            Explore Dataset <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secondary Overview Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 mb-1">Palay Production Cost Breakdown (2022–2025)</h3>
+                    <p class="text-xs text-slate-500 mb-4">Cash costs, fertilizer share, labor, and non-cash expenses per hectare</p>
+                    <div class="relative h-72">
+                        <canvas id="overviewCostChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 mb-1">Regional Fertilizer Price Comparison (₱ / 50-kg sack)</h3>
+                    <p class="text-xs text-slate-500 mb-4">Average price across major island groups and regions</p>
+                    <div class="relative h-72">
+                        <canvas id="overviewRegionalChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: FERTILIZER ANALYTICS ================= -->
+        <div id="tab-fertilizer" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Dealers Prices of Fertilizers (2019–2026)</h2>
+                    <p class="text-xs text-slate-500">Track monthly and annual retail/dealers prices per 50-kilogram sack across 4 major grades.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="exportData('fertilizer')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-download mr-1.5"></i> Export Fertilizer Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+                    <h3 class="text-base font-bold text-slate-900 mb-4">Fertilizer Grade Price Trajectory (2019–2026)</h3>
+                    <div class="relative h-80">
+                        <canvas id="fertilizerGradeChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2">Grade Summary (2026 National Avg)</h3>
+                        <p class="text-xs text-slate-500 mb-4">Current average dealer prices per 50-kg sack:</p>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-700">Urea (45-0-0)</span>
+                                <span class="text-sm font-bold text-emerald-700">₱1,140.12</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-700">Complete (14-14-14)</span>
+                                <span class="text-sm font-bold text-emerald-700">₱1,172.30</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-700">Ammophos (16-20-0)</span>
+                                <span class="text-sm font-bold text-emerald-700">₱994.89</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-700">Ammosul (21-0-0)</span>
+                                <span class="text-sm font-bold text-emerald-700">₱644.88</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400">
+                        <i class="fa-solid fa-circle-info mr-1 text-emerald-600"></i> Prices monitored across 100 geolocations.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: RETAIL RICE ================= -->
+        <div id="tab-rice" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Retail Prices of Cereals / Rice (2019–2026)</h2>
+                    <p class="text-xs text-slate-500">Annual retail prices per kilogram for Well-Milled, Regular-Milled, and Special rice.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="exportData('rice')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-download mr-1.5"></i> Export Rice Price Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 mb-4">Rice Retail Price Trend (₱ / kg)</h3>
+                    <div class="relative h-80">
+                        <canvas id="riceTrendChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 mb-4">Cereal Classification Comparison (2019 vs 2026)</h3>
+                    <div class="relative h-80">
+                        <canvas id="riceComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: PALAY ECONOMICS ================= -->
+        <div id="tab-palay" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Palay Production Costs & Returns (2022–2025)</h2>
+                    <p class="text-xs text-slate-500">Comprehensive breakdown of cash costs (fertilizer, labor, seeds), gross returns, and net profit per hectare.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="exportData('palay')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-download mr-1.5"></i> Export Palay Economics
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+                    <h3 class="text-base font-bold text-slate-900 mb-4">Production Costs vs. Gross & Net Returns (₱ / Hectare)</h3>
+                    <div class="relative h-80">
+                        <canvas id="palayEconomicsChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 mb-2">Cost Structure Highlights</h3>
+                        <p class="text-xs text-slate-500 mb-4">Average per hectare breakdown (2025):</p>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-700">Cash Costs (Total)</span>
+                                <span class="text-sm font-bold text-slate-900">₱31,200.00</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-700">... Fertilizer Cost</span>
+                                <span class="text-sm font-bold text-emerald-700">₱6,253.65</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-700">Non-Cash & Imputed</span>
+                                <span class="text-sm font-bold text-slate-900">₱23,897.43</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <span class="text-sm font-semibold text-emerald-900">Net Returns (Profit)</span>
+                                <span class="text-sm font-extrabold text-emerald-700">₱37,402.57</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400">
+                        <i class="fa-solid fa-circle-info mr-1 text-emerald-600"></i> Data from PSA Cost and Returns of Palay Production.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: DATA EXPLORER ================= -->
+        <div id="tab-explorer" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Integrated Data Explorer</h2>
+                        <p class="text-xs text-slate-500">Search, filter, and inspect records across fertilizers, retail rice prices, and palay economics.</p>
+                    </div>
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <div class="relative flex-1 md:w-64">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-search text-xs"></i>
+                            </span>
+                            <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Search region, grade, or year..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg pl-9 pr-4 py-2 focus:ring-emerald-500 focus:border-emerald-500 font-medium">
+                        </div>
+                        <button onclick="exportTableCSV()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-sm whitespace-nowrap">
+                            <i class="fa-solid fa-file-csv mr-1.5"></i> Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Wrapper -->
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left border-collapse" id="dataTable">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                                <th class="p-3.5">Dataset / Category</th>
+                                <th class="p-3.5">Geolocation / Region</th>
+                                <th class="p-3.5">Indicator / Grade</th>
+                                <th class="p-3.5">Year</th>
+                                <th class="p-3.5 text-right">Value (₱)</th>
+                                <th class="p-3.5 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-xs text-slate-700 font-medium bg-white" id="tableBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination info -->
+                <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
+                    <span id="tableCount">Showing all records</span>
+                    <div class="flex space-x-1">
+                        <button class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded text-slate-600 font-medium">Previous</button>
+                        <button class="px-3 py-1 bg-emerald-600 text-white rounded font-medium">1</button>
+                        <button class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded text-slate-600 font-medium">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
+            <p>© 2026 Philippine Rice & Fertilizer Analytics Dashboard. Built for OpenSTAT & FPA Data Integration.</p>
+            <div class="flex space-x-4">
+                <span class="hover:text-emerald-700 cursor-pointer">Documentation</span>
+                <span class="hover:text-emerald-700 cursor-pointer">API Access</span>
+                <span class="hover:text-emerald-700 cursor-pointer">PSA OpenSTAT</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification (Custom alert replacement) -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMessage" class="text-xs font-medium">Action completed successfully.</span>
+
+        <script src="philippine_rice_fertilizer_dashboard.js"></script>
+    </div>
+</body>
+</html>
